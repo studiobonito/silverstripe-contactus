@@ -31,6 +31,7 @@ class ContactUsPage extends Page implements Mappable {
 		'LocationPostcode' => 'Varchar',
 		'Lat' => 'Varchar',
 		'Lng' => 'Varchar',
+		'MapAPIKey' => 'Varchar',
 		'MapHeight' => 'Int',
 		'MapWidth' => 'Int'
 	);
@@ -77,6 +78,7 @@ class ContactUsPage extends Page implements Mappable {
 		$fields->addFieldToTab("Root.Content.ContactDetails", new TextField('ContactTelephone', 'Telephone Number'));
 		$fields->addFieldToTab("Root.Content.ContactDetails", new TextField('ContactEmail', 'Email Address'));
 
+		$fields->addFieldToTab("Root.Content.MapSettings", new TextField('MapAPIKey', 'Map API Key (GoogleMaps)'));
 		$fields->addFieldToTab("Root.Content.MapSettings", new NumericField('MapHeight', 'Map Height (px)'));
 		$fields->addFieldToTab("Root.Content.MapSettings", new NumericField('MapWidth', 'Map Width (px)'));
 		$fields->addFieldToTab("Root.Content.MapSettings", new ImageField('MapPin', 'Map Pin'));
@@ -94,7 +96,12 @@ class ContactUsPage extends Page implements Mappable {
 		$this->Lat = $location->lat;
 		$this->Lng = $location->lng;
 		
+		GoogleMapUtil::set_api_key($this->MapAPIKey);
+		
 		$config = SiteConfig::current_site_config();
+		$config->ContactTelephone = $this->ContactTelephone;
+		$config->ContactEmail = $this->ContactEmail;
+		$config->write();
 	}
 	
 	public function ContactMap() {
