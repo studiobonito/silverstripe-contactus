@@ -31,14 +31,47 @@ class ContactUsPage extends Page implements Mappable {
 		'LocationPostcode' => 'Varchar',
 		'Lat' => 'Varchar',
 		'Lng' => 'Varchar',
-		'MapAPIKey' => 'Varchar',
+		'MapAPIKey' => 'Text',
 		'MapHeight' => 'Int',
-		'MapWidth' => 'Int'
+		'MapWidth' => 'Int',
+		'MapZoom' => 'Int',
+		'MapIconSize' => 'Int'
 	);
 	
 	public static $has_one = array(
-		'MapPin' => 'Image'
+		'MapIcon' => 'Image'
 	);
+	
+	public static $defaults = array(
+		'MapHeight' => '300',
+		'MapWidth' => '400',
+		'MapZoom' => '16',
+		'MapIconSize' => '32'
+	);
+
+	public function getCMSFields() {
+		$fields = parent::getCMSFields();
+		
+		$fields->addFieldToTab("Root.Content.ContactDetails", new TextField('LocationTitle', 'Location Title'));
+		$fields->addFieldToTab("Root.Content.ContactDetails", new TextField('LocationAddress1', 'Address Line 1'));
+		$fields->addFieldToTab("Root.Content.ContactDetails", new TextField('LocationAddress2', 'Address Line 2'));
+		$fields->addFieldToTab("Root.Content.ContactDetails", new TextField('LocationTownCity', 'Town/City'));
+		$fields->addFieldToTab("Root.Content.ContactDetails", new TextField('LocationCounty', 'County'));
+		$fields->addFieldToTab("Root.Content.ContactDetails", new CountryDropdownField('LocationCountry', 'Country'));
+		$fields->addFieldToTab("Root.Content.ContactDetails", new TextField('LocationPostcode', 'Postcode'));
+		
+		$fields->addFieldToTab("Root.Content.ContactDetails", new TextField('ContactTelephone', 'Telephone Number'));
+		$fields->addFieldToTab("Root.Content.ContactDetails", new TextField('ContactEmail', 'Email Address'));
+
+		$fields->addFieldToTab("Root.Content.MapSettings", new TextField('MapAPIKey', 'Map API Key (GoogleMaps)'));
+		$fields->addFieldToTab("Root.Content.MapSettings", new NumericField('MapHeight', 'Map Height (px)'));
+		$fields->addFieldToTab("Root.Content.MapSettings", new NumericField('MapWidth', 'Map Width (px)'));
+		$fields->addFieldToTab("Root.Content.MapSettings", new DropdownField('MapZoom', 'Map Zoom Level (default)', array('16' => '10 (Zoomed In)', '15' => '9', '14' => '8', '13' => '7', '12' => '6', '11' => '5', '10' => '4', '9' => '3', '8' => '2', '7' => '1 (Zoomed Out)')));
+		$fields->addFieldToTab("Root.Content.MapSettings", new DropdownField('MapIconSize', 'Map Pin Size', array('48' => 'Large', '32' => 'Medium', '24' => 'Small', '16' => 'Tiny')));
+		$fields->addFieldToTab("Root.Content.MapSettings", new ImageField('MapIcon', 'Map Pin'));
+
+		return $fields;
+	}
 	
 	/* Mappable interface requirements */
 
@@ -59,32 +92,10 @@ class ContactUsPage extends Page implements Mappable {
     }
 
     public function getMapPin() {
-        return $this->MapPin()->URL;
+        return $this->MapIcon()->SetRatioSize($this->MapIconSize, $this->MapIconSize)->URL;
     }
 
 	/* end Mappable interface */
-
-	function getCMSFields() {
-		$fields = parent::getCMSFields();
-		
-		$fields->addFieldToTab("Root.Content.ContactDetails", new TextField('LocationTitle', 'Location Title'));
-		$fields->addFieldToTab("Root.Content.ContactDetails", new TextField('LocationAddress1', 'Address Line 1'));
-		$fields->addFieldToTab("Root.Content.ContactDetails", new TextField('LocationAddress2', 'Address Line 2'));
-		$fields->addFieldToTab("Root.Content.ContactDetails", new TextField('LocationTownCity', 'Town/City'));
-		$fields->addFieldToTab("Root.Content.ContactDetails", new TextField('LocationCounty', 'County'));
-		$fields->addFieldToTab("Root.Content.ContactDetails", new CountryDropdownField('LocationCountry', 'Country'));
-		$fields->addFieldToTab("Root.Content.ContactDetails", new TextField('LocationPostcode', 'Postcode'));
-		
-		$fields->addFieldToTab("Root.Content.ContactDetails", new TextField('ContactTelephone', 'Telephone Number'));
-		$fields->addFieldToTab("Root.Content.ContactDetails", new TextField('ContactEmail', 'Email Address'));
-
-		$fields->addFieldToTab("Root.Content.MapSettings", new TextField('MapAPIKey', 'Map API Key (GoogleMaps)'));
-		$fields->addFieldToTab("Root.Content.MapSettings", new NumericField('MapHeight', 'Map Height (px)'));
-		$fields->addFieldToTab("Root.Content.MapSettings", new NumericField('MapWidth', 'Map Width (px)'));
-		$fields->addFieldToTab("Root.Content.MapSettings", new ImageField('MapPin', 'Map Pin'));
-
-		return $fields;
-	}
 	
 	protected function onBeforeWrite() {
 		parent::onBeforeWrite();
@@ -96,20 +107,18 @@ class ContactUsPage extends Page implements Mappable {
 		$this->Lat = $location->lat;
 		$this->Lng = $location->lng;
 		
-		GoogleMapUtil::set_api_key($this->MapAPIKey);
-		
-		$config = SiteConfig::current_site_config();
-		$config->ContactTelephone = $this->ContactTelephone;
-		$config->ContactEmail = $this->ContactEmail;
-		$config->write();
+		$site_config = SiteConfig::current_site_config();
+		$site_config->ContactTelephone = $this->ContactTelephone;
+		$site_config->ContactEmail = $this->ContactEmail;
+		$site_config->write();
 	}
 	
 	public function ContactMap() {
 		$gmap = GoogleMapUtil::get_map(new DataObjectSet($this));
-		$gmap->setSize($this->MapHeight, $this->MapWidth);
+		$gmap->setSize($this->MapWidth, $this->MapHeight);
 		$gmap->setEnableAutomaticCenterZoom(false);
-		$gmap->setZoom(14);
-		$gmap->setIconSize(32, 32);
+		$gmap->setZoom($this->MapZoom);
+		$gmap->setIconSize($this->MapIconSize, $this->MapIconSize);
 		$gmap->setLatLongCenter(array(
 			'200',
 			'4',
@@ -125,6 +134,51 @@ class ContactUsPage_Controller extends Page_Controller {
 
 	public function init() {
 		parent::init();
+		GoogleMapUtil::set_api_key($this->MapAPIKey);
+	}
+	
+	public function processEnquiryForm($data) {
+		$enquiry = new EnquiryObject();
+		
+		$enquiry->Name = isset($data['EnquiryName']) ? $data['EnquiryName'] : null;
+		$enquiry->Phone = isset($data['EnquiryPhone']) ? $data['EnquiryPhone'] : null;
+		$enquiry->Email = isset($data['EnquiryEmail']) ? $data['EnquiryEmail'] : null;
+		$enquiry->Comment = isset($data['EnquiryComment']) ? $data['EnquiryComment'] : null;
+		
+		if(empty($enquiry->Phone) && empty($enquiry->Email)) {
+			return $this->render(array('ErrorMessage' => 'Please provide either a phone number or an email address!'));
+		}
+		
+		$enquiry->write();
+		
+		if(!empty($this->ContactEmail)) {
+			$email = new Email($this->ContactEmail, $this->ContactEmail, 'Website Enquiry');
+			$email->setTemplate('EnquiryEmail');
+			$email->populateTemplate(array(
+				'Name' => $enquiry->Name,
+				'Phone' => $enquiry->Phone,
+				'Email' => $enquiry->Email,
+				'Comment' => $enquiry->Comment
+			));
+			$email->send();
+		}
+		
+		return $this->render(array('SuccessMessage' => 'Thank you for your enquiry.'));
+	}
+	
+	public function EnquiryForm() {
+		$fields = new FieldSet();
+		
+		$fields->push(new TextField('EnquiryName', 'Name'));
+		$fields->push(new TextField('EnquiryPhone', 'Phone'));
+		$fields->push(new TextField('EnquiryEmail', 'Email'));
+		$fields->push(new TextareaField('EnquiryComment', 'Comment'));
+		
+		$actions = new FieldSet();
+		
+		$actions->push(new FormAction('processEnquiryForm', 'Send', null, null, 'submit'));
+		
+		return new Form($this, 'EnquiryForm', $fields, $actions);
 	}
 	
 }
