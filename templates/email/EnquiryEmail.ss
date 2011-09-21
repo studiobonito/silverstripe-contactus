@@ -1,0 +1,10 @@
+<dl>
+	<dt>Name</dt>
+		<dd>$Name</dd>
+	<dt>Phone</dt>
+		<dd>$Phone</dd>
+	<dt>Email</dt>
+		<dd>$Email</dd>
+	<dt>Comment</dt>
+		<dd>$Coment</dd>
+</dl>
