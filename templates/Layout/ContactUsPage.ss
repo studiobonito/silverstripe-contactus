@@ -20,14 +20,14 @@
 			
 			$Content
 
-			$ContactForm
+			$EnquiryForm
 				
 		</div>		
 
 		<aside role="complementary" class="vcard">
 		
-			<h2 class="tel">Tel: $ContactTelephone</h2>
-			<p>email: <a class="email" href="mailto:{$ContactEmail}?subject=Enquiry%20or%20Comments">{$ContactEmail}</a></p>
+			<h2>Tel: <a class="tel" href="tel:{$ContactTelephone}">$ContactTelephone</a></h2>
+			<p>email: <a class="email" href="mailto:{$ContactEmail}?subject=Enquiry%20or%20Comments">$ContactEmail</a></p>
 			
 			<section class="address">
 				<h2>$LocationTitle</h2>
