@@ -141,9 +141,11 @@ class ContactUsPage_Controller extends Page_Controller {
 		$enquiry = new EnquiryObject();
 		
 		$enquiry->Name = isset($data['EnquiryName']) ? $data['EnquiryName'] : null;
+		$enquiry->Company = isset($data['EnquiryCompany']) ? $data['EnquiryCompany'] : null;
 		$enquiry->Phone = isset($data['EnquiryPhone']) ? $data['EnquiryPhone'] : null;
 		$enquiry->Email = isset($data['EnquiryEmail']) ? $data['EnquiryEmail'] : null;
-		$enquiry->Comment = isset($data['EnquiryComment']) ? $data['EnquiryComment'] : null;
+		$enquiry->Subject = isset($data['EnquirySubject']) ? $data['EnquirySubject'] : null;
+		$enquiry->Message = isset($data['EnquiryMessage']) ? $data['EnquiryMessage'] : null;
 		
 		if(empty($enquiry->Phone) && empty($enquiry->Email)) {
 			return $this->render(array('ErrorMessage' => 'Please provide either a phone number or an email address!'));
@@ -156,9 +158,11 @@ class ContactUsPage_Controller extends Page_Controller {
 			$email->setTemplate('EnquiryEmail');
 			$email->populateTemplate(array(
 				'Name' => $enquiry->Name,
+				'Company' => $enquiry->Company,
 				'Phone' => $enquiry->Phone,
 				'Email' => $enquiry->Email,
-				'Comment' => $enquiry->Comment
+				'Subject' => $enquiry->Subject,
+				'Message' => $enquiry->Message
 			));
 			$email->send();
 		}
@@ -170,15 +174,21 @@ class ContactUsPage_Controller extends Page_Controller {
 		$fields = new FieldSet();
 		
 		$fields->push(new TextField('EnquiryName', 'Name'));
+		$fields->push(new TextField('EnquiryCompany', 'Company'));
 		$fields->push(new TextField('EnquiryPhone', 'Phone'));
 		$fields->push(new TextField('EnquiryEmail', 'Email'));
-		$fields->push(new TextareaField('EnquiryComment', 'Comment'));
+		$fields->push(new TextField('EnquirySubject', 'Subject'));
+		$fields->push(new TextareaField('EnquiryMessage', 'Message'));
 		
 		$actions = new FieldSet();
 		
 		$actions->push(new FormAction('processEnquiryForm', 'Send', null, null, 'submit'));
 		
-		return new Form($this, 'EnquiryForm', $fields, $actions);
+		$form = new Form($this, 'EnquiryForm', $fields, $actions);
+		
+		$this->extend('updateEnquiryForm', $form);
+		
+		return $form;
 	}
 	
 }
