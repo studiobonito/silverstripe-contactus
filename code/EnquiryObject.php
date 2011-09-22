@@ -23,16 +23,18 @@ class EnquiryObject extends DataObject {
 	
 	public static $db = array(
 		'Name' => 'Varchar',
+		'Company' => 'Varchar',
 		'Phone' => 'Varchar',
 		'Email' => 'Varchar',
-		'Comment' => 'Text'
+		'Subject' => 'Varchar',
+		'Message' => 'Text'
 	);
 	
 	public static $summary_fields = array(
 		'Name' => 'Name',
 		'Phone' => 'Phone',
 		'Email' => 'Email',
-		'Created' => 'Request date'
+		'Created' => 'Date'
 	);
 	
 	public static $searchable_fields = array(
@@ -40,14 +42,5 @@ class EnquiryObject extends DataObject {
 		'Phone',
 		'Email'
 	);
-
-	public function getCMSFieldsForPopup() {
-		$fields = new FieldSet();
-		$fields->push(new TextField('Name'));
-		$fields->push(new TextField('Phone'));
-		$fields->push(new TextField('Email'));
-		$fields->push(new TextareaField('Comment'));
-		return $fields;
-	}
 	
 }
