@@ -111,6 +111,7 @@ class ContactUsPage extends Page implements Mappable {
 		
 		$site_config = SiteConfig::current_site_config();
 		$site_config->ContactTelephone = $this->ContactTelephone;
+		$site_config->ContactTelephonePlain = $this->getContactTelephonePlain();
 		$site_config->ContactEmail = $this->ContactEmail;
 		$site_config->write();
 	}
