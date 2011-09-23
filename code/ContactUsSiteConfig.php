@@ -21,6 +21,7 @@ class ContactUsSiteConfig extends DataObjectDecorator {
 		return array(
 			'db' => array(
 				'ContactTelephone' => 'Varchar',
+				'ContactTelephonePlain' => 'Varchar',
 				'ContactEmail' => 'Varchar'
 			)
 		);

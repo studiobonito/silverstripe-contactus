@@ -26,9 +26,9 @@
 
 		<aside role="complementary" class="vcard">
 		
-			<h2>Tel: <a class="tel" href="tel:{$ContactTelephone}">$ContactTelephone</a></h2>
+			<h2>Tel: <a class="tel" href="tel:{$ContactTelephonePlain}">$ContactTelephone</a></h2>
 			<p>email: <a class="email" href="mailto:{$ContactEmail}?subject=Enquiry%20or%20Comments">$ContactEmail</a></p>
-			
+
 			<section class="address">
 				<h2>$LocationTitle</h2>
 				<address class="adr">
@@ -36,7 +36,7 @@
 					<% if LocationAddress1 %><span class="extended-address">$LocationAddress2</span><% end_if %>
 					<% if LocationAddress1 %><span class="locality">$LocationTownCity</span><% end_if %>
 					<% if LocationAddress1 %><span class="region">$LocationCounty</span><% end_if %>
-					<% if LocationAddress1 %><span class="country-name">$LocationCountry</span><% end_if %>
+					<% if LocationAddress1 %><span class="country-name">$LocationCountryName</span><% end_if %>
 					<% if LocationAddress1 %><span class="postal-code">$LocationPostcode</span><% end_if %>
 				</address>
 			</section>

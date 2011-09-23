@@ -107,13 +107,24 @@ class ContactUsPage extends Page implements Mappable {
 		$this->Lat = $location->lat;
 		$this->Lng = $location->lng;
 		
+		$this->ContactTelephone = preg_replace('/[^0-9\+\(\)\s]/', '', $this->ContactTelephone);
+		
 		$site_config = SiteConfig::current_site_config();
 		$site_config->ContactTelephone = $this->ContactTelephone;
 		$site_config->ContactEmail = $this->ContactEmail;
 		$site_config->write();
 	}
 	
-	public function ContactMap() {
+	public function getContactTelephonePlain() {
+		return preg_replace('/[(0)]|[^0-9\+]/', '', $this->ContactTelephone);
+	}
+	
+	public function getLocationCountryName() {
+		return GeoIP::countryCode2name($this->LocationCountry);
+	}
+
+
+	public function getContactMap() {
 		$gmap = GoogleMapUtil::get_map(new DataObjectSet($this));
 		$gmap->setSize($this->MapWidth, $this->MapHeight);
 		$gmap->setEnableAutomaticCenterZoom(false);
@@ -189,6 +200,18 @@ class ContactUsPage_Controller extends Page_Controller {
 		$this->extend('updateEnquiryForm', $form);
 		
 		return $form;
+	}
+	
+	public function ContactTelephonePlain() {
+		return $this->getContactTelephonePlain();
+	}
+	
+	public function LocationCountryName() {
+		return $this->getLocationCountryName();
+	}
+	
+	public function ContactMap() {
+		return $this->getContactMap();
 	}
 	
 }
