@@ -1,10 +1,14 @@
 <dl>
 	<dt>Name</dt>
-		<dd>$Name</dd>
+		<dd>$EnquiryName</dd>
+	<dt>Company</dt>
+		<dd>$EnquiryCompany</dd>
 	<dt>Phone</dt>
-		<dd>$Phone</dd>
+		<dd>$EnquiryPhone</dd>
 	<dt>Email</dt>
-		<dd>$Email</dd>
-	<dt>Comment</dt>
-		<dd>$Coment</dd>
+		<dd>$EnquiryEmail</dd>
+	<dt>Subject</dt>
+		<dd>$EnquirySubject</dd>
+	<dt>Message</dt>
+		<dd>$EnquiryMessage</dd>
 </dl>

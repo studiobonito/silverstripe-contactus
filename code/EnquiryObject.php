@@ -22,25 +22,25 @@ class EnquiryObject extends DataObject {
 	public static $plural_name = 'Enquiries';
 	
 	public static $db = array(
-		'Name' => 'Varchar',
-		'Company' => 'Varchar',
-		'Phone' => 'Varchar',
-		'Email' => 'Varchar',
-		'Subject' => 'Varchar',
-		'Message' => 'Text'
+		'EnquiryName' => 'Varchar',
+		'EnquiryCompany' => 'Varchar',
+		'EnquiryPhone' => 'Varchar',
+		'EnquiryEmail' => 'Varchar',
+		'EnquirySubject' => 'Varchar',
+		'EnquiryMessage' => 'Text'
 	);
 	
 	public static $summary_fields = array(
-		'Name' => 'Name',
-		'Phone' => 'Phone',
-		'Email' => 'Email',
-		'Created' => 'Date'
+		'EnquiryName' => 'Name',
+		'EnquiryPhone' => 'Phone',
+		'EnquiryEmail' => 'Email',
+		'EnquiryCreated' => 'Date'
 	);
 	
 	public static $searchable_fields = array(
-		'Name',
-		'Phone',
-		'Email'
+		'EnquiryName' => array('title' => 'Name'),
+		'EnquiryPhone' => array('title' => 'Phone'),
+		'EnquiryEmail' => array('title' => 'Email')
 	);
 	
 }

@@ -149,17 +149,12 @@ class ContactUsPage_Controller extends Page_Controller {
 		GoogleMapUtil::set_api_key($this->MapAPIKey);
 	}
 	
-	public function processEnquiryForm($data) {
+	public function processEnquiryForm($data, $form) {
 		$enquiry = new EnquiryObject();
 		
-		$enquiry->Name = isset($data['EnquiryName']) ? $data['EnquiryName'] : null;
-		$enquiry->Company = isset($data['EnquiryCompany']) ? $data['EnquiryCompany'] : null;
-		$enquiry->Phone = isset($data['EnquiryPhone']) ? $data['EnquiryPhone'] : null;
-		$enquiry->Email = isset($data['EnquiryEmail']) ? $data['EnquiryEmail'] : null;
-		$enquiry->Subject = isset($data['EnquirySubject']) ? $data['EnquirySubject'] : null;
-		$enquiry->Message = isset($data['EnquiryMessage']) ? $data['EnquiryMessage'] : null;
+		$form->saveInto($enquiry);
 		
-		if(empty($enquiry->Phone) && empty($enquiry->Email)) {
+		if(empty($enquiry->EnquiryPhone) && empty($enquiry->EnquiryEmail)) {
 			return $this->render(array('ErrorMessage' => 'Please provide either a phone number or an email address!'));
 		}
 		
@@ -168,14 +163,16 @@ class ContactUsPage_Controller extends Page_Controller {
 		if(!empty($this->ContactEmail)) {
 			$email = new Email($this->ContactEmail, $this->ContactEmail, 'Website Enquiry');
 			$email->setTemplate('EnquiryEmail');
-			$email->populateTemplate(array(
-				'Name' => $enquiry->Name,
-				'Company' => $enquiry->Company,
-				'Phone' => $enquiry->Phone,
-				'Email' => $enquiry->Email,
-				'Subject' => $enquiry->Subject,
-				'Message' => $enquiry->Message
-			));
+			
+			$fields = array_keys(DataObject::custom_database_fields($enquiry->class)); // Get EnquiryObject field names.
+		
+			$email_data = array();
+			
+			foreach($fields as $field) {
+				$email_data[$field] = $enquiry->getField($field);
+			}
+			
+			$email->populateTemplate($email_data);
 			$email->send();
 		}
 		
