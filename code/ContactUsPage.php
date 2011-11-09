@@ -104,15 +104,15 @@ class ContactUsPage extends Page implements Mappable {
 				$response = Convert::json2array($json);
 				$location = $response['results'][0]->geometry->location;
 		}
-		$this->Lat = $location->lat;
-		$this->Lng = $location->lng;
+		$this->Lat = $location->lat ?: '';
+		$this->Lng = $location->lng ?: '';
 		
 		$this->ContactTelephone = preg_replace('/[^0-9\+\(\)\s]/', '', $this->ContactTelephone);
 		
 		$site_config = SiteConfig::current_site_config();
-		$site_config->ContactTelephone = $this->ContactTelephone;
-		$site_config->ContactTelephonePlain = $this->getContactTelephonePlain();
-		$site_config->ContactEmail = $this->ContactEmail;
+		$site_config->ContactTelephone = $this->ContactTelephone ?: '';
+		$site_config->ContactTelephonePlain = $this->getContactTelephonePlain() ?: '';
+		$site_config->ContactEmail = $this->ContactEmail ?: '';
 		$site_config->write();
 	}
 	
