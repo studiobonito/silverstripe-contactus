@@ -100,12 +100,12 @@ class ContactUsPage extends Page implements Mappable {
 	protected function onBeforeWrite() {
 		parent::onBeforeWrite();
 		$address = preg_replace('/\s\s+/', '+', "{$this->LocationAddress1} {$this->LocationAddress2} {$this->LocationTownCity} {$this->LocationCounty} {$this->LocationCountry} {$this->LocationPostcode}");
-		if($json = @file_get_contents("http://maps.googleapis.com/maps/api/geocode/json?sensor=false&address=".urlencode($address))) {
-				$response = Convert::json2array($json);
-				$location = $response['results'][0]->geometry->location;
+		if($address != '+' && $json = @file_get_contents("http://maps.googleapis.com/maps/api/geocode/json?sensor=false&address=".urlencode($address))) {
+			$response = Convert::json2array($json);
+			$location = $response['results'][0]->geometry->location;
+			$this->Lat = $location->lat ?: '';
+			$this->Lng = $location->lng ?: '';
 		}
-		$this->Lat = $location->lat ?: '';
-		$this->Lng = $location->lng ?: '';
 		
 		$this->ContactTelephone = preg_replace('/[^0-9\+\(\)\s]/', '', $this->ContactTelephone);
 		
