@@ -35,7 +35,8 @@ class ContactUsPage extends Page implements Mappable {
 		'MapHeight' => 'Int',
 		'MapWidth' => 'Int',
 		'MapZoom' => 'Int',
-		'MapIconSize' => 'Int'
+		'MapIconSize' => 'Int',
+		'UseAddress' => 'Boolean',
 	);
 	
 	public static $has_one = array(
@@ -59,6 +60,7 @@ class ContactUsPage extends Page implements Mappable {
 		$fields->addFieldToTab("Root.Content.ContactDetails", new TextField('LocationCounty', 'County'));
 		$fields->addFieldToTab("Root.Content.ContactDetails", new CountryDropdownField('LocationCountry', 'Country'));
 		$fields->addFieldToTab("Root.Content.ContactDetails", new TextField('LocationPostcode', 'Postcode'));
+		$fields->addFieldToTab('Root.Content.ContactDetails', new CheckboxField('UseAddress', 'Use the address above for the Google Map pin?'));
 		
 		$fields->addFieldToTab("Root.Content.ContactDetails", new TextField('ContactTelephone', 'Telephone Number'));
 		$fields->addFieldToTab("Root.Content.ContactDetails", new TextField('ContactEmail', 'Email Address'));
@@ -69,6 +71,8 @@ class ContactUsPage extends Page implements Mappable {
 		$fields->addFieldToTab("Root.Content.MapSettings", new DropdownField('MapZoom', 'Map Zoom Level (default)', array('16' => '10 (Zoomed In)', '15' => '9', '14' => '8', '13' => '7', '12' => '6', '11' => '5', '10' => '4', '9' => '3', '8' => '2', '7' => '1 (Zoomed Out)')));
 		$fields->addFieldToTab("Root.Content.MapSettings", new DropdownField('MapIconSize', 'Map Pin Size', array('48' => 'Large', '32' => 'Medium', '24' => 'Small', '16' => 'Tiny')));
 		$fields->addFieldToTab("Root.Content.MapSettings", new ImageField('MapIcon', 'Map Pin'));
+		$fields->addFieldToTab("Root.Content.MapSettings", new TextField('Lat', 'Latitude'));
+		$fields->addFieldToTab("Root.Content.MapSettings", new TextField('Lng', 'Longitude'));
 
 		return $fields;
 	}
@@ -99,20 +103,24 @@ class ContactUsPage extends Page implements Mappable {
 	
 	protected function onBeforeWrite() {
 		parent::onBeforeWrite();
-		$address = preg_replace('/\s\s+/', '+', "{$this->LocationAddress1} {$this->LocationAddress2} {$this->LocationTownCity} {$this->LocationCounty} {$this->LocationCountry} {$this->LocationPostcode}");
-		if($json = @file_get_contents("http://maps.googleapis.com/maps/api/geocode/json?sensor=false&address=".urlencode($address))) {
-				$response = Convert::json2array($json);
-				$location = $response['results'][0]->geometry->location;
+		
+		if($this->UseAddress)
+		{
+			$address = preg_replace('/\s\s+/', '+', "{$this->LocationAddress1} {$this->LocationAddress2} {$this->LocationTownCity} {$this->LocationCounty} {$this->LocationCountry} {$this->LocationPostcode}");
+			if($json = @file_get_contents("http://maps.googleapis.com/maps/api/geocode/json?sensor=false&address=".urlencode($address))) {
+					$response = Convert::json2array($json);
+					$location = $response['results'][0]->geometry->location;
+			}
+			$this->Lat = $location->lat ?: '';
+			$this->Lng = $location->lng ?: '';
 		}
-		$this->Lat = $location->lat;
-		$this->Lng = $location->lng;
 		
 		$this->ContactTelephone = preg_replace('/[^0-9\+\(\)\s]/', '', $this->ContactTelephone);
 		
 		$site_config = SiteConfig::current_site_config();
-		$site_config->ContactTelephone = $this->ContactTelephone;
-		$site_config->ContactTelephonePlain = $this->getContactTelephonePlain();
-		$site_config->ContactEmail = $this->ContactEmail;
+		$site_config->ContactTelephone = $this->ContactTelephone ?: '';
+		$site_config->ContactTelephonePlain = $this->getContactTelephonePlain() ?: '';
+		$site_config->ContactEmail = $this->ContactEmail ?: '';
 		$site_config->write();
 	}
 	
